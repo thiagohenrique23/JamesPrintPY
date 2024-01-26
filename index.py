@@ -1,50 +1,45 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 import time
-import pyautogui
 import schedule
 
 # Define o caminho para o driver do Chrome
-driver_path = 'https://drive.google.com/drive/folders/1l9QxAL5K5-ZDpTpTm95h0c16QLGckW5B?usp=sharing'
+
+service = Service(executable_path='./chromedriver.exe')
+
+# Configuração da instância do navegador
+
+options = webdriver.ChromeOptions()
+options.add_argument("--disable-extensions")
+options.add_argument("--headless") 
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--disable-gpu")
 
 # Inicializa o driver do Chrome
-driver = webdriver.Chrome(executable_path=driver_path)
+driver = webdriver.Chrome(service=service, options=options)
 
-# Abre a página do Google
+# Abre a página
+
 driver.get('https://vtnews.com.br/')
 
+# Ajusta o tamanho da janela
+
+driver.set_window_size(1920, 1080)
+
 # Função para tirar o print screen
+
 def tirar_print_screen():
-    # Obtém a altura total da página
-    altura_pagina = driver.execute_script('return document.body.scrollHeight')
-
-    # Define as dimensões da janela do navegador
-    largura_janela = driver.execute_script('return window.innerWidth')
-    altura_janela = driver.execute_script('return window.innerHeight')
-
-    # Calcula o número de capturas de tela necessárias
-    num_capturas = altura_pagina // altura_janela + 1
-
-    # Captura as capturas de tela da página inteira
-    imagens = []
-    for i in range(num_capturas):
-        # Tira o print screen da parte visível da página
-        screenshot = driver.get_screenshot_as_png()
-        imagens.append(screenshot)
-
-        # Simula a rolagem para a próxima posição
-        pyautogui.scroll(altura_janela)
-
-    # Combina as capturas de tela em uma única imagem
-    screenshot_completo = pyautogui.stitch(imagens)
-
-    # Salva o print screen da página completa
-    screenshot_path = f'https://drive.google.com/drive/folders/1l9QxAL5K5-ZDpTpTm95h0c16QLGckW5B?usp=sharing{time.strftime("%Y-%m-%d_%H-%M")}.png'
-    with open(screenshot_path, 'wb') as f:
-        f.write(screenshot_completo)
+    
+    # Tira um screenshot da página
+    
+    screenshot_path = f'Caminho{time.strftime("%Y-%m-%d_%H-%M")}.png' # Observação não esquecer de trocar o caminho para o print 
+    driver.save_screenshot(screenshot_path)
 
     print(f'Print screen completo salvo em: {screenshot_path}')
 
 # Agendamento para tirar o print screen diariamente às 18:00
+
 schedule.every().day.at('18:00').do(tirar_print_screen)
 
 # Loop principal para verificar as tarefas agendadas
